@@ -283,6 +283,7 @@ Other possible causes:
               targetPadding: targetPadding,
               highlightRadius: highlightRadius,
               highlightBorderColor: highlightBorderColor,
+              highlightBorderWidth: highlightBorderWidth,
             ),
 
             // Tooltip with arrow
@@ -444,6 +445,7 @@ Other possible causes:
     required double targetPadding,
     required double highlightRadius,
     required Color highlightBorderColor,
+    required double highlightBorderWidth,
   }) {
     return Stack(
       children: [
@@ -487,7 +489,10 @@ Other possible causes:
             decoration: BoxDecoration(
               color: Colors.transparent,
               borderRadius: BorderRadius.circular(highlightRadius),
-              border: Border.all(color: highlightBorderColor, width: 2),
+              border: Border.all(
+                color: highlightBorderColor,
+                width: highlightBorderWidth,
+              ),
             ),
           ),
         ),
