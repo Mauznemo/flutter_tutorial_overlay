@@ -1,5 +1,3 @@
-// Your existing code with added documentation comments
-
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'tutorial_step.dart';
@@ -62,7 +60,7 @@ class TutorialOverlay {
   final Color highlightBorderColor;
 
   /// Whether the overlay can be dismissed by tapping outside the tooltip.
-  final bool dismissable;
+  final bool dismissible;
 
   /// Custom style for the "Next" button.
   final ButtonStyle? nextButtonStyle;
@@ -113,7 +111,7 @@ class TutorialOverlay {
   EdgeInsetsGeometry? tooltipPadding;
 
   /// Custom text for the "Finish" button.
-  final String? finshText;
+  final String? finishText;
 
   /// Custom text for the "Next" button.
   final String? nextText;
@@ -126,7 +124,7 @@ class TutorialOverlay {
   /// The [context] and [steps] parameters are required. All other parameters
   /// have sensible defaults but can be customized as needed.
   ///
-  /// If [showButtons] is false, [dismissable] should be true to allow users
+  /// If [showButtons] is false, [dismissible] should be true to allow users
   /// to exit the tutorial.
   ///
   /// **Migration Note**: The [onNext] parameter is deprecated. Use [TutorialStep.onStepNext]
@@ -157,26 +155,24 @@ class TutorialOverlay {
     this.titleTextColor,
     this.descriptionTextColor,
     this.targetPadding = 0,
-    this.dismissable = false,
+    this.dismissible = false,
     this.nextButtonStyle,
     this.finishButtonStyle,
     this.skipButtonStyle,
     this.showButtons = true,
     this.nextText,
-    this.finshText,
+    this.finishText,
     this.skipText,
   }) : assert(
-         dismissable || showButtons,
-         'showButtons must be true or set dismissable to true\n'
-         'If showButtons is set to false and dismissable is not true, user will not be able exit the tutorial overlay',
+         dismissible || showButtons,
+         'showButtons must be true or set dismissible to true\n'
+         'If showButtons and dismissible is set ti false the user will not be able exit the tutorial overlay',
        ) {
     if (blurOpacity < 0) blurOpacity = 20;
   }
 
   /// Starts the tutorial by showing the first step.
   void show() => _showStep();
-
-  // ... rest of your existing implementation remains the same
 
   void _showStep() {
     if (_currentStep >= steps.length) {
@@ -188,37 +184,11 @@ class TutorialOverlay {
     final step = steps[_currentStep];
     final currentContext = step.targetKey.currentContext;
     assert(currentContext != null, '''
-❌ TutorialOverlay Error: Could not find target widget for step $_currentStep.
+TutorialOverlay Error: Could not find target widget for step $_currentStep.
 
 This happens because you're trying to highlight a widget that is not yet build like the widgets Flutter
 creates automatically (example: the AppBar drawer button). That widget does
 not exist in your widget tree, so it cannot have a GlobalKey.
-
-❌ Instead of: (using the key of Drawer() widget to highlight the drawer Button)
-
-final GlobalKey _drawerKey = GlobalKey();
-Scaffold(
-  appBar: AppBar(),
-  drawer: Drawer(
-❌  key: _drawerKey
-  ),
-);
-
-✅ Do this (explicitly provide your own drawer button with a key):
-final GlobalKey _drawerKey = GlobalKey();
-
-Scaffold(
-  appBar: AppBar(
-    leading: IconButton(
-  ✅  key: _drawerKey,
-      icon: Icon(Icons.menu),
-      onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-    ),
-  ),
-  drawer: Drawer(...),
-);
-
-Now you can safely pass `_drawerKey` into your TutorialStep.
 
 Other possible causes:
 - The widget is not built yet (e.g. off-screen in a scroll view).
@@ -244,7 +214,7 @@ Other possible causes:
         final safetyBottomMargin = 20;
 
         // Decide whether tooltip goes above or below
-        final bool showAtbottom =
+        final bool showAtBottom =
             holeRect.bottom +
                 edgePadding +
                 tooltipEstimatedHeight +
@@ -252,7 +222,7 @@ Other possible causes:
             screen.height;
 
         // Tooltip vertical position
-        double tooltipTop = showAtbottom
+        double tooltipTop = showAtBottom
             ? (holeRect.top - edgePadding - tooltipEstimatedHeight)
             : (holeRect.bottom + edgePadding);
 
@@ -299,7 +269,7 @@ Other possible causes:
                 child: _buildTooltip(
                   title: step.title,
                   text: step.description,
-                  showAtbottom: showAtbottom,
+                  showAtBottom: showAtBottom,
                   arrowDx: arrowDx,
                   width: tooltipWidth,
                   tooltipBorderRadius: tooltipBorderRadius,
@@ -310,7 +280,7 @@ Other possible causes:
                 ),
               ),
             ),
-            if (dismissable) GestureDetector(onTap: _removeOverlay),
+            if (dismissible) GestureDetector(onTap: _removeOverlay),
           ],
         );
       },
@@ -322,7 +292,7 @@ Other possible causes:
   Widget _buildTooltip({
     required String title,
     required String text,
-    required bool showAtbottom,
+    required bool showAtBottom,
     required double arrowDx,
     required double width,
     required double tooltipBorderRadius,
@@ -336,7 +306,7 @@ Other possible causes:
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (!showAtbottom)
+          if (!showAtBottom)
             CustomPaint(
               painter: ArrowPainter(
                 arrowDx: arrowDx,
@@ -384,7 +354,7 @@ Other possible causes:
                         style:
                             skipButtonStyle ??
                             _buildDefaultButtonStyle(
-                              forgroundColor: Colors.black,
+                              foregroundColor: Colors.black,
                               backgroundColor: Colors.white,
                             ),
                         child: Text(skipText ?? 'Skip'),
@@ -397,7 +367,7 @@ Other possible causes:
                             : (nextButtonStyle ?? _buildDefaultButtonStyle()),
                         child: Text(
                           isLastStep
-                              ? (finshText ?? 'Finsh')
+                              ? (finishText ?? 'Finish')
                               : (nextText ?? 'Next'),
                         ),
                       ),
@@ -406,7 +376,7 @@ Other possible causes:
               ],
             ),
           ),
-          if (showAtbottom)
+          if (showAtBottom)
             CustomPaint(
               painter: ArrowPainter(
                 arrowDx: arrowDx,
@@ -422,11 +392,11 @@ Other possible causes:
 
   ButtonStyle _buildDefaultButtonStyle({
     Color backgroundColor = Colors.blue,
-    Color forgroundColor = Colors.white,
+    Color foregroundColor = Colors.white,
   }) {
     return ElevatedButton.styleFrom(
       backgroundColor: backgroundColor,
-      foregroundColor: forgroundColor,
+      foregroundColor: foregroundColor,
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
     );
