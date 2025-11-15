@@ -174,6 +174,9 @@ class TutorialOverlay {
   /// Starts the tutorial by showing the first step.
   void show() => _showStep();
 
+  /// Dismisses the tutorial overlay.
+  void dismiss() => _removeOverlay();
+
   void _showStep() {
     if (_currentStep >= steps.length) {
       _removeOverlay();

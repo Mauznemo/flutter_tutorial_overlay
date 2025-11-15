@@ -120,6 +120,20 @@ TutorialStep(
 )
 ```
 
+To dismiss the tutorial overlay from code you can simply call:
+
+```dart
+final tutorial = TutorialOverlay(
+  context: context,
+  steps: steps,
+);
+
+tutorial.show();
+
+// Then just call where you need it
+tutorial.dismiss()
+```
+
 ## Migration from v1.0.0
 
 If you're upgrading from v1.0.0, replace the global onNext callback with step-specific ones:
