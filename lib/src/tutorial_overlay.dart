@@ -453,6 +453,7 @@ Other possible causes:
                 width: holeSize.width + targetPadding * 2,
                 height: holeSize.height + targetPadding * 2,
               ),
+              holeRadius: highlightRadius,
             ),
           ),
         ),
@@ -466,6 +467,7 @@ Other possible causes:
                 width: holeSize.width + targetPadding * 2,
                 height: holeSize.height + targetPadding * 2,
               ),
+              holeRadius: highlightRadius,
             ),
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
@@ -569,15 +571,20 @@ class InvertedHoleClipper extends CustomClipper<Path> {
   /// The rectangular area to exclude from the clipping path.
   final Rect holeRect;
 
+  /// The corner radius of the excluded area.
+  final double holeRadius;
+
   /// Creates a new inverted hole clipper.
-  InvertedHoleClipper({required this.holeRect});
+  InvertedHoleClipper({required this.holeRect, this.holeRadius = 8});
 
   @override
   Path getClip(Size size) {
     final path = Path()..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
 
     final holePath = Path()
-      ..addRRect(RRect.fromRectAndRadius(holeRect, const Radius.circular(8)));
+      ..addRRect(
+        RRect.fromRectAndRadius(holeRect, Radius.circular(holeRadius)),
+      );
 
     return Path.combine(PathOperation.difference, path, holePath);
   }
@@ -591,8 +598,11 @@ class BlurOverlayPainter extends CustomPainter {
   /// The rectangular area to exclude from the overlay.
   final Rect holeRect;
 
+  /// The corner radius of the excluded area.
+  final double holeRadius;
+
   /// Creates a new blur overlay painter.
-  BlurOverlayPainter({required this.holeRect});
+  BlurOverlayPainter({required this.holeRect, this.holeRadius = 8});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -601,7 +611,9 @@ class BlurOverlayPainter extends CustomPainter {
     final path = Path()..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
 
     final holePath = Path()
-      ..addRRect(RRect.fromRectAndRadius(holeRect, const Radius.circular(8)));
+      ..addRRect(
+        RRect.fromRectAndRadius(holeRect, Radius.circular(holeRadius)),
+      );
 
     final finalPath = Path.combine(PathOperation.difference, path, holePath);
 
