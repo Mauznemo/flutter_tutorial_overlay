@@ -226,13 +226,14 @@ Other possible causes:
 
         final safetyBottomMargin = 20;
 
-        // Decide whether tooltip goes above or below
+        // Decide whether tooltip goes above or below: below while it fits
+        // there, else on the side with more room. A target that leaves room
+        // on neither side is then covered as little as possible.
+        final roomBelow = screen.height - holeRect.bottom - safetyBottomMargin;
+        final roomAbove = holeRect.top;
         final bool showAtBottom =
-            holeRect.bottom +
-                edgePadding +
-                tooltipEstimatedHeight +
-                safetyBottomMargin >
-            screen.height;
+            roomBelow < edgePadding + tooltipEstimatedHeight &&
+            roomAbove > roomBelow;
 
         // Tooltip vertical position
         double tooltipTop = showAtBottom
