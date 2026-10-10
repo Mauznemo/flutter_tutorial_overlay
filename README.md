@@ -278,6 +278,7 @@ TutorialOverlay(
 | description  | String            | The description text for the tooltip             |
 | tag          | String            | New! Unique identifier for the step              |
 | onStepNext   | Function(String)? | New! Callback when user taps "Next" on this step |
+| onBeforeShow | Future<void> Function(String)? | Awaited before the step is shown, e.g. to scroll its target into view. The overlay stays dimmed meanwhile |
 
 ### TutorialOverlay
 
