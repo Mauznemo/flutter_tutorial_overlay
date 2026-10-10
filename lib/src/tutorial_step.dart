@@ -36,6 +36,17 @@ class TutorialStep {
   /// The callback receives the current step's tag (or index as string if no tag is provided).
   final void Function(String stepTag)? onStepNext;
 
+  /// Callback invoked before this step is shown, and awaited.
+  ///
+  /// Use it to get the target ready: scroll it into view, switch to the tab
+  /// it is on, wait for an animation to end. The target is only looked up
+  /// and measured once the returned future completes. Until then the overlay
+  /// stays dimmed, without a highlight and without a tooltip.
+  ///
+  /// The callback receives the step's tag (or index as string if no tag is
+  /// provided).
+  final Future<void> Function(String stepTag)? onBeforeShow;
+
   /// Creates a new tutorial step.
   ///
   /// Required parameters:
@@ -46,12 +57,14 @@ class TutorialStep {
   /// Optional parameters:
   /// - [tag]: A unique identifier for this step
   /// - [onStepNext]: Callback for when user taps "Next" on this step
+  /// - [onBeforeShow]: Awaited before this step is shown
   TutorialStep({
     required this.targetKey,
     required this.description,
     required this.title,
     this.tag,
     this.onStepNext,
+    this.onBeforeShow,
   });
 
   /// Returns the effective tag for this step.

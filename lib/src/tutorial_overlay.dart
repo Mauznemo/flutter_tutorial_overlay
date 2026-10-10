@@ -193,6 +193,61 @@ class TutorialOverlay {
     }
 
     final step = steps[_currentStep];
+    final onBeforeShow = step.onBeforeShow;
+    if (onBeforeShow == null) {
+      _showHighlight(step);
+    } else {
+      _showHighlightAfter(onBeforeShow, step);
+    }
+  }
+
+  /// Runs [onBeforeShow] and shows [step] once it is done.
+  ///
+  /// The screen stays dimmed in the meantime, without a highlight and
+  /// without a tooltip, so the app does not flash up between two steps and
+  /// nothing under the overlay can be tapped.
+  Future<void> _showHighlightAfter(
+    Future<void> Function(String stepTag) onBeforeShow,
+    TutorialStep step,
+  ) async {
+    final scrim = OverlayEntry(builder: (context) => _buildScrim());
+    _overlayEntry = scrim;
+    Overlay.of(context).insert(scrim);
+
+    try {
+      await onBeforeShow(step.getEffectiveTag(_currentStep));
+    } catch (_) {
+      if (_overlayEntry == scrim) _removeOverlay();
+      rethrow;
+    }
+
+    // Dismissed in the meantime.
+    if (_overlayEntry != scrim) return;
+    scrim.remove();
+    _overlayEntry = null;
+    if (!context.mounted) return;
+    _showHighlight(step);
+  }
+
+  Widget _buildScrim() {
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: AbsorbPointer(absorbing: true, child: SizedBox()),
+        ),
+        Positioned.fill(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
+            child: Container(
+              color: overlayTint.withAlpha(blurOpacity.clamp(0, 255).toInt()),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showHighlight(TutorialStep step) {
     final currentContext = step.targetKey.currentContext;
     assert(currentContext != null, '''
 TutorialOverlay Error: Could not find target widget for step $_currentStep.
