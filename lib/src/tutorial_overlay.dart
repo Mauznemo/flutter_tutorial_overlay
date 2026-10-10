@@ -35,6 +35,9 @@ class TutorialOverlay {
   int _currentStep = 0;
   OverlayEntry? _overlayEntry;
 
+  /// Whether "Next" was tapped and the next step is not on screen yet.
+  bool _advancing = false;
+
   /// The estimated height of tooltips for positioning calculations.
   double tooltipEstimatedHeight;
 
@@ -556,22 +559,44 @@ Other possible causes:
   }
 
   void _nextStep() {
-    _overlayEntry?.remove();
-    _overlayEntry = null;
+    // The step that is on its way out stays up for one more frame. A second
+    // tap on it must not go on twice.
+    if (_advancing) return;
+
     final step = steps[_currentStep];
     _currentStep++;
 
-    if (_currentStep < steps.length) {
-      _showStep();
-      step.onStepNext?.call(step.getEffectiveTag(_currentStep));
-      // ignore: deprecated_member_use_from_same_package
-      onNext?.call();
-    } else {
+    if (_currentStep >= steps.length) {
+      _overlayEntry?.remove();
+      _overlayEntry = null;
       step.onStepNext?.call(step.getEffectiveTag(_currentStep));
       _removeOverlay();
       onComplete?.call();
       onFinish?.call();
+      return;
     }
+
+    // The callbacks run before the next step is shown: they may change the
+    // layout (a counter that grows, a panel that opens), and the next target
+    // has to be measured where it is afterwards.
+    final entry = _overlayEntry;
+    step.onStepNext?.call(step.getEffectiveTag(_currentStep));
+    // ignore: deprecated_member_use_from_same_package
+    onNext?.call();
+    // Dismissed by one of them.
+    if (_overlayEntry != entry) return;
+
+    // What they changed is laid out in the next frame. The current step stays
+    // on screen until then, so the app does not flash up in between.
+    _advancing = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _advancing = false;
+      if (_overlayEntry != entry) return;
+      entry?.remove();
+      _overlayEntry = null;
+      _showStep();
+    });
+    WidgetsBinding.instance.ensureVisualUpdate();
   }
 
   void _removeOverlay() {
